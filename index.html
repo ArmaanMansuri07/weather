@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RadarX</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="logo">
+
+        <nav>
+            <ul>
+                <li class="menu-btn">☰</li>
+                <li class="amlogo"><img src="dark_logo.jpg" alt=""></li>
+                <li class="radar">RadarX</li>
+                <li>Home</li>
+                <li>Weather</li>
+                <li>Contact</li>
+            </ul>
+        </nav>
+    </div>
+    <div class="first">
+        <h1>Check Weather</h1>
+    </div>
+
+    </div>
+    <div class="container">
+
+        <div class="header">
+            <div class="search-box">
+                <input type="text" placeholder="Enter Location" class="input-box">
+                <button id="searchBtn"><img src="search.jpg" alt=""></button>
+            </div>
+        </div>
+
+        <div class="map"><img src="map.jpg" alt=""></div>
+        <div class="location-not-found">
+            <h1>Sorry, Location not found!!!</h1>
+            <img src="404.png" alt="404 Error">
+        </div>
+
+
+        <div class="weather-body">
+            <img src="cloud.png" alt="Weather Image" class="weather-img">
+
+            <div class="weather-box">
+                <p class="temperature">0 <sup>°C</sup></p>
+                <p class="description"></p>
+            </div>
+            <div class="details">
+                <div class="humidity">
+                    <img src="humidity.jpg" alt="">
+                    <div class="text">
+                        <span id="humidity">0%</span>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="wind">
+                    <img src="wind.jpg" alt="">
+                    <div class="text">
+                        <span id="wind-speed">0 Km/H</span>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="chart-section">
+        <h3>Temperature Graph</h3>
+        <canvas id="tempChart"></canvas>
+    </div>
+    <div class="heading">
+        <p>Get real-time weather updates with accurate temperature, humidity, and wind speed details for any city
+            worldwide.
+        </p>
+
+        <div class="footer">
+            <p>Powered by OpenWeather API | Designed & Coded by Armaan Mansuri</p>
+            <div class="social">
+                <a href="https://www.instagram.com/armaan.mansuri07" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-instagram"></i>
+                </a><br>
+
+                <a href="https://www.facebook.com/" target="_blank">
+                    <i class="fab fa-facebook-f"></i>
+                </a><br>
+
+                <a href="https://wa.me/your-number" target="_blank">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+            </div>
+        </div>
+
+        <script>
+            const inputBox = document.querySelector('.input-box');
+            const searchBtn = document.getElementById('searchBtn');
+            const weather_img = document.querySelector('.weather-img');
+            const temperature = document.querySelector('.temperature');
+            const description = document.querySelector('.description');
+            const humidity = document.getElementById('humidity');
+            const wind_speed = document.getElementById('wind-speed');
+            const location_not_found = document.querySelector('.location-not-found');
+            const weather_body = document.querySelector('.weather-body');
+
+            async function checkWeather(city) {
+                const api_key = "db43105ddde5c9b2e4c6e3b18c14cded";
+                const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${api_key}`;
+
+                const weather_data = await fetch(url).then(response => response.json());
+
+                if (weather_data.cod === "404") {
+                    location_not_found.style.display = "flex";
+                    weather_body.style.display = "none";
+                    return;
+                }
+
+                location_not_found.style.display = "none";
+                weather_body.style.display = "flex";
+
+                const temp = Math.round(weather_data.main.temp - 273.15);
+
+                temperature.innerHTML = `${temp}°C`;
+                humidity.innerHTML = `${weather_data.main.humidity}%`;
+                wind_speed.innerHTML = `${weather_data.wind.speed} Km/H`;
+
+                let mainWeather = weather_data.weather[0].main.toLowerCase();
+
+                if (mainWeather === "snow") {
+                    description.innerHTML = "Snow";
+                    weather_img.src = "snow.png";
+                }
+                else if (mainWeather === "rain" || mainWeather === "drizzle" || mainWeather === "thunderstorm") {
+                    description.innerHTML = "Rainy";
+                    weather_img.src = "rain.png";
+                }
+                else if (mainWeather === "clouds") {
+                    description.innerHTML = "Cloudy";
+                    weather_img.src = "cloud.png";
+                }
+                else if (mainWeather === "clear") {
+                    if (temp >= 28) {
+                        description.innerHTML = "Sunny";
+                    } else {
+                        description.innerHTML = "Clear";
+                    }
+                    weather_img.src = "clear.png";
+                }
+                else if (mainWeather === "mist" || mainWeather === "fog" || mainWeather === "haze") {
+                    description.innerHTML = "Misty";
+                    weather_img.src = "mist.png";
+                }
+                else {
+                    description.innerHTML = mainWeather;
+                    weather_img.src = "cloud.png";
+                }
+                const mapBg = document.querySelector(".map img");
+
+                if (mainWeather === "clear" && temp >= 28) {
+                    mapBg.src = "sunny-bg.jpg";
+                }
+                else if (mainWeather === "clouds") {
+                    mapBg.src = "cloudy-bg.jpg";
+                }
+                else if (mainWeather === "rain" || mainWeather === "drizzle" || mainWeather === "thunderstorm") {
+                    mapBg.src = "rain-bg.jpg";
+                }
+                else if (mainWeather === "snow") {
+                    mapBg.src = "snow-bg.jpg";
+                }
+                else if (mainWeather === "mist" || mainWeather === "fog" || mainWeather === "haze") {
+                    mapBg.src = "mist-bg.jpg";
+                }
+                else {
+                    mapBg.src = "map.jpg";
+                }
+            }
+
+
+            searchBtn.addEventListener('click', () => {
+                checkWeather(inputBox.value);
+            });
+
+
+
+            const menuBtn = document.querySelector(".menu-btn");
+            const navList = document.querySelector(".logo nav ul");
+
+            menuBtn.addEventListener("click", () => {
+                navList.classList.toggle("active");
+            });
+
+
+
+            const ctx = document.getElementById('tempChart');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Morning', 'Noon', 'Evening', 'Night'],
+                    datasets: [{
+                        label: 'Temperature °C',
+                        data: [20, 28, 25, 22],
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+
+
+
+        </script>
+</body>
+
+</html>
